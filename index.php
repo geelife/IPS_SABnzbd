@@ -3,57 +3,63 @@ class SabNzbd{
 
 public $apiAddress = "https://192.168.0.254:9090/sabnzbd/"; // IP, Domain, Port
 public $apiKey = "58d04ec6bdbeed9cc70c32032a8e6629";
-public $apiOperation;// Possible: qstatus, version
+public $apiOperation;// Possible: qstatus, version, queue
 public $apiOutput; //json or xml
 
-public function __construct($apiOperation, $apiOutput)
-{
-    $this->apiOperation = $apiOperation;
-    $this->apiOutput = $apiOutput;
-}
+    public function __construct($apiOperation, $apiOutput)
+    {
+        $this->apiOperation = $apiOperation;
+        $this->apiOutput = $apiOutput;
+    }
 
-function GetSabNzbdApiUrl()
-{
-     return  $this->apiAddress."api?apikey=".$this->apiKey."&mode=".$this->apiOperation."&output=".$this->apiOutput;
-}
+    function GetSabNzbdApiUrl()
+    {
+         return  $this->apiAddress."api?apikey=".$this->apiKey."&mode=".$this->apiOperation."&output=".$this->apiOutput;
+    }
 
-function ExecuteCurlOnSabnzbd($url)
-{
-    $ch = curl_init();
-    
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); //disable SSL verification on peer
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false); //disable SSL verification on host
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  //returns response; prints response if set to false
-    //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/'.$this->apiOutput)); //required for sending data to api
-    curl_setopt($ch, CURLOPT_URL, $url);
-    
-    $result = curl_exec($ch);
-    if (FALSE === $result)
-        throw new Exception(curl_error($ch), curl_errno($ch));
-    
-    curl_close($ch);
-    return $result;
-}
+    function ExecuteCurlOnSabnzbd()
+    {
+        $url = $this->GetSabNzbdApiUrl();
+        $ch = curl_init();
+        
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); //disable SSL verification on peer
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false); //disable SSL verification on host
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  //returns response; prints response if set to false
+        //curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/'.$this->apiOutput)); //required for sending data to api
+        curl_setopt($ch, CURLOPT_URL, $url);
+        
+        $result = curl_exec($ch);
+        if (FALSE === $result)
+            throw new Exception(curl_error($ch), curl_errno($ch));
+        
+        curl_close($ch);
+        return $result;
+    }
 
 }
 
 $testObject = new SabNzbd("version","json");
-$sabNzbdBaseUrl = $testObject->GetSabNzbdApiUrl();
 
-$result = $testObject->ExecuteCurlOnSabnzbd($sabNzbdBaseUrl);
+$version = $testObject->ExecuteCurlOnSabnzbd();
 
-//var_dump($result);
-//var_dump(json_decode($result,true));
+/*
+var_dump($version);
+var_dump(json_decode($version,true));
 
-$sabWarnings = new SabNzbd("warnings", "json");
-$warnings = $sabWarnings->ExecuteCurlOnSabnzbd($sabWarnings->GetSabNzbdApiUrl());
+
+
+ $testObject->apiOperation = "warnings";
+$warnings = $testObject->ExecuteCurlOnSabnzbd();
 
 var_dump($warnings);
-
 $decodedWarnings = json_decode($warnings,true);
-//var_dump($decodedWarnings);
+var_dump($decodedWarnings); */
 
-
+$testObject->apiOperation="queue";
+$queue = $testObject->ExecuteCurlOnSabnzbd();
+$decodedQueue = json_decode($queue);
+var_dump($queue);
+var_dump(json_decode($queue,true));
 
 
 ?>
@@ -73,3 +79,23 @@ $decodedWarnings = json_decode($warnings,true);
 
 ?>
 </table>
+
+<?php 
+
+foreach ($decodedQueue as $queue)
+{
+    
+    foreach ($queue as $key => $value)
+    {
+        if(!is_array($value))
+        {
+            print "Schluessel: ".$key."     Wert: ".$value."<br>";
+        }
+        else 
+        {
+            print "VALUE OF ".$key." IS ARRAY <br>";
+        }
+    }
+}
+?>
+
