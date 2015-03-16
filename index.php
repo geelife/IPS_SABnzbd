@@ -35,6 +35,26 @@ public $apiOutput; //json or xml
         curl_close($ch);
         return $result;
     }
+    
+    function GetIPSDataTypeCode($dataType)
+    {
+     switch($dataType)
+     {
+         case "string";
+         default:
+             return 3;
+             break;
+         case "double": //float
+             return 2;
+             break;
+         case "integer":
+             return 1;
+             break;
+         case "boolean":
+             return 0;
+             break;
+     }
+    }
 
 }
 
@@ -89,7 +109,7 @@ foreach ($decodedQueue as $queue)
     {
         if(!is_array($value))
         {
-            print "Schluessel: ".$key."     Wert: ".$value."<br>";
+            print "Schluessel: ".$key."     Wert: ".$value."      DATA TYPE=".gettype($value)."    IPS CODE= ".$testObject->GetIPSDataTypeCode(gettype($value))."<br>";
         }
         else 
         {
