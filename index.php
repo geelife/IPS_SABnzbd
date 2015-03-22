@@ -114,6 +114,10 @@ foreach ($decodedQueue as $queue)
         else 
         {
             print "VALUE OF ".$key." IS ARRAY <br>";
+            foreach($value as $key => $value)
+            {
+                print "------Key ".$key."   Value: ".$value; 
+            }
         }
     }
 }
